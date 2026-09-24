@@ -1,0 +1,8 @@
+[project]
+name = "weight-camp-safety"
+version = "0.1.0"
+description = "减重训练安全干预台领域契约"
+requires-python = ">=3.11"
+
+[tool.unittest]
+start-directory = "tests"
