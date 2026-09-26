@@ -21,6 +21,17 @@ class ContractTests(unittest.TestCase):
     def test_sample_is_valid(self) -> None:
         self.assertEqual([], validate_event(self.sample, self.schema))
 
+    def test_sample_trace_events_are_all_valid(self) -> None:
+        trace = json.loads((ROOT / "data" / "sample_trace.json").read_text(encoding="utf-8"))
+        for event in trace["events"]:
+            self.assertEqual([], validate_event(event, self.schema), event["event_id"])
+
+    def test_schema_and_validator_register_same_types(self) -> None:
+        from weight_camp_safety.contracts import AGGREGATE_TYPES, EVENT_TYPES
+
+        self.assertEqual(set(self.schema["properties"]["event_type"]["enum"]), set(EVENT_TYPES))
+        self.assertEqual(set(self.schema["properties"]["aggregate_type"]["enum"]), set(AGGREGATE_TYPES))
+
     def test_missing_fields_are_reported_in_stable_order(self) -> None:
         issues = validate_event({}, self.schema)
         self.assertEqual(sorted(issue.field for issue in issues), [issue.field for issue in issues])
@@ -36,6 +47,21 @@ class ContractTests(unittest.TestCase):
         payload = dict(self.sample, event_type="UNKNOWN")
         issues = validate_event(payload, self.schema)
         self.assertEqual([("event_type", "unsupported_value")], [(item.field, item.code) for item in issues])
+
+    def test_idempotency_key_must_come_as_pair(self) -> None:
+        payload = dict(self.sample, source_record_id="WR-1")
+        codes = {(i.field, i.code) for i in validate_event(payload, self.schema)}
+        self.assertIn(("source_record_id", "idempotency_key_pair_required"), codes)
+
+    def test_basis_refs_must_be_unique_non_empty(self) -> None:
+        payload = dict(self.sample, basis_refs=["a", "a"])
+        codes = {(i.field, i.code) for i in validate_event(payload, self.schema)}
+        self.assertIn(("basis_refs", "unique_non_empty_strings"), codes)
+        self.assertEqual([], validate_event(dict(self.sample, basis_refs=["a"]), self.schema))
+
+    def test_unknown_actor_role_is_rejected(self) -> None:
+        issues = validate_event(dict(self.sample, actor_role="marketing"), self.schema)
+        self.assertIn(("actor_role", "unsupported_value"), {(i.field, i.code) for i in issues})
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "减重训练安全干预台领域事件",
+  "description": "训练风险干预服务的事件交换约定：同意、医学与运动评估、禁忌与转诊、教练资质、饮食训练处方、每日执行、体征症状、应急处置、商业承诺与退款分别以独立聚合留存版本；规则结论必须回引依据事件，系统分层不构成医生诊断。",
   "type": "object",
   "required": [
     "event_id",
@@ -19,20 +20,62 @@
     "event_type": {
       "type": "string",
       "enum": [
+        "CONSENT_GRANTED",
+        "CONSENT_WITHDRAWN",
         "ASSESSMENT_APPROVED",
+        "MEDICAL_REVIEW_RECORDED",
+        "RISK_STRATIFIED",
+        "CONTRAINDICATION_ISSUED",
+        "REFERRAL_REQUESTED",
+        "REFERRAL_FEEDBACK_RECORDED",
+        "PROFESSIONAL_REVIEW_OPENED",
+        "PROFESSIONAL_REVIEW_CLOSED",
+        "COACH_CERTIFICATION_RECORDED",
+        "COACH_CERTIFICATION_REVOKED",
+        "PRESCRIPTION_ISSUED",
+        "PRESCRIPTION_SUPERSEDED",
         "PLAN_ACTIVATED",
+        "PLAN_REVISED",
         "SESSION_RECORDED",
+        "VITALS_RECORDED",
+        "SYMPTOM_REPORTED",
         "TRAINING_STOPPED",
-        "FOLLOWUP_CLOSED"
+        "TRAINING_RESUMED",
+        "SAFETY_INCIDENT_OPENED",
+        "EMERGENCY_RESPONDED",
+        "SAFETY_INCIDENT_CLOSED",
+        "FOLLOWUP_CLOSED",
+        "COMMITMENT_RECORDED",
+        "SUSPENSION_RECORD_FILED",
+        "REFUND_SETTLED",
+        "NOTIFICATION_QUEUED",
+        "NOTIFICATION_DELIVERED",
+        "NOTIFICATION_FAILED",
+        "INGESTION_DEDUPED",
+        "DATA_REVIEW_OPENED",
+        "DATA_REVIEW_RESOLVED"
       ]
     },
     "aggregate_type": {
       "type": "string",
       "enum": [
         "participant",
+        "consent",
+        "medical_assessment",
         "risk_assessment",
+        "contraindication_opinion",
+        "referral",
+        "professional_review",
+        "coach_certification",
+        "prescription",
         "training_plan",
-        "safety_incident"
+        "session_execution",
+        "vital_sign",
+        "safety_incident",
+        "commercial_commitment",
+        "refund_settlement",
+        "emergency_notification",
+        "ingestion_record"
       ]
     },
     "aggregate_id": {
@@ -50,6 +93,62 @@
     "summary": {
       "type": "string",
       "minLength": 1
+    },
+    "participant_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "学员统一标识，监管追溯链路据此从事故串到入营评估、处方版本与每次处置。"
+    },
+    "site_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_role": {
+      "type": "string",
+      "enum": [
+        "participant",
+        "coach",
+        "site_staff",
+        "sales",
+        "medical_reviewer",
+        "medical_director",
+        "system",
+        "regulator",
+        "administrator"
+      ]
+    },
+    "source_record_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "门店离线补传与穿戴设备上报的来源记录标识，与 content_hash 共同构成幂等键。"
+    },
+    "content_hash": {
+      "type": "string",
+      "minLength": 1,
+      "description": "来源记录载荷的规范化哈希；同 source_record_id 异哈希进入人工复核而非覆盖。"
+    },
+    "effective_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "处方/计划变更生效时间；变更只作用于该时间之后的未来安排。"
+    },
+    "basis_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "本结论或动作所依据的事件标识（停训依据、分层依据、复核依据等）。"
+    },
+    "review_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "恢复训练所依据的专业复核单标识。"
     }
   },
   "additionalProperties": true
