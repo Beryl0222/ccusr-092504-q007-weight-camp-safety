@@ -21,8 +21,12 @@
       "enum": [
         "ASSESSMENT_APPROVED",
         "PLAN_ACTIVATED",
+        "PRESCRIPTION_UPDATED",
         "SESSION_RECORDED",
         "TRAINING_STOPPED",
+        "ESCALATION_RAISED",
+        "TRAINING_RESUMED",
+        "REFUND_SETTLED",
         "FOLLOWUP_CLOSED"
       ]
     },
@@ -32,7 +36,8 @@
         "participant",
         "risk_assessment",
         "training_plan",
-        "safety_incident"
+        "safety_incident",
+        "refund_settlement"
       ]
     },
     "aggregate_id": {
